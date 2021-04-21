@@ -23,7 +23,7 @@ local _G                           = _G
 local format                       = format
 --local Print                        = Print
 
-LoggingLib.STARTUP                 = -1
+LoggingLib.INACTIVE                = -1
 LoggingLib.ERROR                   = 0
 LoggingLib.WARNING                 = 1
 LoggingLib.INFO                    = 2
@@ -33,7 +33,6 @@ LoggingLib.TRACE                   = 4
 LoggingLib.UNDEFINED_CATEGORY      = "UNDEFINED"
 
 LoggingLib.logging_level_to_string = {
-    [LoggingLib.STARTUP] = "STARTUP",
     [LoggingLib.ERROR]   = "ERROR",
     [LoggingLib.WARNING] = "WARNING",
     [LoggingLib.INFO]    = "INFO",
@@ -42,7 +41,6 @@ LoggingLib.logging_level_to_string = {
 }
 
 LoggingLib.logging_string_to_level = {
-    ["STARTUP"] = LoggingLib.STARTUP,
     ["ERROR"]   = LoggingLib.ERROR,
     ["WARNING"] = LoggingLib.WARNING,
     ["INFO"]    = LoggingLib.INFO,
@@ -52,13 +50,11 @@ LoggingLib.logging_string_to_level = {
 
 if not LoggingLib.Colorama then
     LoggingLib.Default_Color_Map = {
-        [LoggingLib.STARTUP] = '|cff00ccff',
         [LoggingLib.ERROR]   = '|cffff0000',
         [LoggingLib.WARNING] = '|cffFF4500',
         [LoggingLib.INFO]    = '|cff00ccff',
         [LoggingLib.DEBUG]   = '|cff7f7f7f',
         [LoggingLib.TRACE]   = '|cffADFF2F',
-        ["STARTUP"]          = '|cff00ccff',
         ["ERROR"]            = '|cffff0000',
         ["WARNING"]          = '|cffFF4500',
         ["INFO"]             = '|cff00ccff',
@@ -68,13 +64,11 @@ if not LoggingLib.Colorama then
 else
     print("Got Colorama lib - TODO: get data into it")
     LoggingLib.Default_Color_Map = {
-        [LoggingLib.STARTUP] = '|cff00ccff',
         [LoggingLib.ERROR]   = '|cffff0000',
         [LoggingLib.WARNING] = '|cffFF4500',
         [LoggingLib.INFO]    = '|cff00ccff',
         [LoggingLib.DEBUG]   = '|cff7f7f7f',
         [LoggingLib.TRACE]   = '|cffADFF2F',
-        ["STARTUP"]          = '|cff00ccff',
         ["ERROR"]            = '|cffff0000',
         ["WARNING"]          = '|cffFF4500',
         ["INFO"]             = '|cff00ccff',
@@ -84,7 +78,7 @@ else
 end
 
 -- functions provided to using addon
-local mixins = {
+local mixins           = {
     "InitializeLogging",
     "IsLogLevelActive",
     "Trace",
@@ -97,6 +91,7 @@ local mixins = {
     "Warningf",
     "Error",
     "Errorf",
+    "SetLogLevel"
 }
 
 local DEFAULT_CATEGORY = "DEFAULT"
@@ -132,7 +127,7 @@ function LoggingLib:InitializeLogging(addonName,
     if level_colors and type(level_colors) == "table" then
 
         local str_level
-        for l in { LoggingLib.ERROR, LoggingLib.WARNING, LoggingLib.INFO, LoggingLib.DEBUG, LoggingLib.TRACE, LoggingLib.STARTUP } do
+        for l in { LoggingLib.ERROR, LoggingLib.WARNING, LoggingLib.INFO, LoggingLib.DEBUG, LoggingLib.TRACE } do
             str_level = LoggingLib.logging_level_to_string[l]
             if not level_colors[l] and not level_colors[str_level] then
                 print(format("Missing color level: %s. Aborting", str_level))
@@ -158,6 +153,10 @@ function LoggingLib:InitializeLogging(addonName,
     end
 end
 
+function LoggingLib:SetLogLevel(level)
+    self.active_level = level
+end
+
 function LoggingLib:IsLogLevelActive(level)
     local rval = self.active_level >= level
     return rval
@@ -177,10 +176,10 @@ end
 local function LogMessage(self, cat, level, msg, ...)
     local levelStr  = LoggingLib.GetLogLevelString(self, level)
     local levelClr  = LoggingLib.GetLogLevelColor(self, level)
-    levelStr = format("%s%s|r", levelClr, levelStr)
+    levelStr        = format("%s%s|r", levelClr, levelStr)
     --local msg_color = levelClr -- "|cff00b3ff"
     local msg_color = "|cff00b3ff"
-    local msg_str = format("%s%s|r", msg_color, msg)
+    local msg_str   = format("%s%s|r", msg_color, msg)
     if not cat then cat = LoggingLib.UNDEFINED_CATEGORY end
     local catStr = format("%s%s|r", tostring(self.categories_to_colors[cat]), tostring(cat))
     local new_f
@@ -192,7 +191,7 @@ local function LogMessage(self, cat, level, msg, ...)
         --               msg)
         new_f = format("%s~%d~%s: %s",
                        catStr, -- color + cat text  + reset
-                       level,  -- number
+                       level, -- number
                        levelStr,
                        msg_str)
         LoggingLib.DLAPI.DebugLog(self.addonName, new_f, ...)
@@ -207,7 +206,7 @@ end
 local function LogMessagef(self, cat, level, f, ...)
     local levelStr  = LoggingLib.GetLogLevelString(self, level)
     local levelClr  = LoggingLib.GetLogLevelColor(self, level)
-    levelStr = format("%s%s|r", levelClr, levelStr)
+    levelStr        = format("%s%s|r", levelClr, levelStr)
     --local msg_color = levelClr -- "|cff00b3ff"
     local msg_color = "|cff00b3ff"
     if not cat then cat = LoggingLib.UNDEFINED_CATEGORY end
@@ -217,7 +216,7 @@ local function LogMessagef(self, cat, level, f, ...)
         --new_f = format("%s%s~%d~%s%s: %s", levelClr, catStr, level, msg_color, levelStr, f)
         new_f = format("%s~%d~%s: %s%s|r",
                        catStr, -- color + cat text  + reset
-                       level,  -- number
+                       level, -- number
                        levelStr,
                        msg_color,
                        f)
