@@ -1,4 +1,4 @@
-package-as: ReturnBuffTracker
+package-as: LoggingLib
 
 enable-nolib-creation: no
 

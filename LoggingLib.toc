@@ -1,0 +1,11 @@
+## Title: |cFF22B14CLoggingLib|r v@project-version@
+## Interface: 11306
+## Notes: LoggingLib dev tool for logging with Ace3 or DebugLog
+## Version: v@project-version@
+## Author: |cff00ffdaLoneWanderer-GH|r
+# ## X-Category: Interface Enhancements
+## X-Curse-Project-ID: 474430
+## LoadManagers: AddonLoader
+
+
+
