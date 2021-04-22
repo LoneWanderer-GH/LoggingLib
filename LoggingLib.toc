@@ -1,5 +1,6 @@
 ## Title: |cFF22B14CLoggingLib|r v@project-version@
-## Interface: 11306
+## Interface: 11307
+## Interface-Classic: 11307
 ## Notes: LoggingLib dev tool for logging with Ace3 or DebugLog
 ## Version: v@project-version@
 ## Author: |cff00ffdaLoneWanderer-GH|r
